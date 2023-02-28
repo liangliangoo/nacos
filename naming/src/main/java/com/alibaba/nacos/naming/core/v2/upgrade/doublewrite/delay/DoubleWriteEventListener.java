@@ -63,6 +63,7 @@ public class DoubleWriteEventListener extends Subscriber<ServiceEvent.ServiceCha
     
     @Override
     public void onEvent(ServiceEvent.ServiceChangedEvent event) {
+        // 服务端数据发生变化 时间后端额处理动作
         if (stopDoubleWrite) {
             return;
         }

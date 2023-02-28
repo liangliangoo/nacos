@@ -650,6 +650,7 @@ public abstract class RpcClient implements Closeable {
                     throw new NacosException(NacosException.CLIENT_DISCONNECT,
                             "Client not connected, current status:" + rpcClientStatus.get());
                 }
+                // grpc 远程调用
                 response = this.currentConnection.request(request, timeoutMills);
                 if (response == null) {
                     throw new NacosException(SERVER_ERROR, "Unknown Exception.");

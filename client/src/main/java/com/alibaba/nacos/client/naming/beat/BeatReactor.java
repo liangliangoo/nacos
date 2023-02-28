@@ -101,6 +101,7 @@ public class BeatReactor implements Closeable {
             existBeat.setStopped(true);
         }
         dom2Beat.put(key, beatInfo);
+        // 讲任务当如到队列中 周期执行 每5 秒上报一次心跳
         executorService.schedule(new BeatTask(beatInfo), beatInfo.getPeriod(), TimeUnit.MILLISECONDS);
         MetricsMonitor.getDom2BeatSizeMonitor().set(dom2Beat.size());
     }
@@ -179,6 +180,7 @@ public class BeatReactor implements Closeable {
             }
             long nextTime = beatInfo.getPeriod();
             try {
+                // 讲 beatInfo 发送到 nacos 服务器
                 JsonNode result = serverProxy.sendBeat(beatInfo, BeatReactor.this.lightBeatEnabled);
                 long interval = result.get(CLIENT_BEAT_INTERVAL_FIELD).asLong();
                 boolean lightBeatEnabled = false;
@@ -204,6 +206,7 @@ public class BeatReactor implements Closeable {
                     instance.setInstanceId(instance.getInstanceId());
                     instance.setEphemeral(true);
                     try {
+                        // 如果nacos 服务端没有这个服务实例 需要注册 重复服务注册流程
                         serverProxy.registerService(beatInfo.getServiceName(),
                                 NamingUtils.getGroupName(beatInfo.getServiceName()), instance);
                     } catch (Exception ignore) {
@@ -217,6 +220,7 @@ public class BeatReactor implements Closeable {
                 NAMING_LOGGER.error("[CLIENT-BEAT] failed to send beat: {}, unknown exception msg: {}",
                         JacksonUtils.toJson(beatInfo), unknownEx.getMessage(), unknownEx);
             } finally {
+                // 下一次执行时间
                 executorService.schedule(new BeatTask(beatInfo), nextTime, TimeUnit.MILLISECONDS);
             }
         }

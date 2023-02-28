@@ -146,7 +146,9 @@ public class NamingHttpClientProxy extends AbstractNamingClientProxy {
         NAMING_LOGGER.info("[REGISTER-SERVICE] {} registering service {} with instance: {}", namespaceId, serviceName,
                 instance);
         String groupedServiceName = NamingUtils.getGroupedName(serviceName, groupName);
+        // 如果是临时节点的话 会开启一个 通过 beatReactor 实现 服务上报 和心跳的检查机制
         if (instance.isEphemeral()) {
+            // 讲服务的详情信息 封装成一个 beatInfo
             BeatInfo beatInfo = beatReactor.buildBeatInfo(groupedServiceName, instance);
             beatReactor.addBeatInfo(groupedServiceName, beatInfo);
         }
@@ -162,7 +164,7 @@ public class NamingHttpClientProxy extends AbstractNamingClientProxy {
         params.put(HEALTHY_PARAM, String.valueOf(instance.isHealthy()));
         params.put(EPHEMERAL_PARAM, String.valueOf(instance.isEphemeral()));
         params.put(META_PARAM, JacksonUtils.toJson(instance.getMetadata()));
-        
+        // http 的形式简单明了，直接调用 nacos 服务端接口实现
         reqApi(UtilAndComs.nacosUrlInstance, params, HttpMethod.POST);
         
     }
